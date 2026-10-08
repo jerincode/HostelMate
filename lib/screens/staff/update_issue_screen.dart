@@ -62,28 +62,61 @@ class _UpdateIssueScreenState extends State<UpdateIssueScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text('Category: ${_incident.category} - ${_incident.subcategory}', style: const TextStyle(fontWeight: FontWeight.bold)),
-            const SizedBox(height: 8),
-            Text('Location: ${_incident.block}, ${_incident.floor} ${_incident.room ?? ""}'),
-            const SizedBox(height: 8),
-            Text('Description: ${_incident.description}'),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Color(0xFFE5E7EB)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Category: ${_incident.category} - ${_incident.subcategory}', style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
+                    const SizedBox(height: 8),
+                    Text('Location: ${_incident.block}, ${_incident.floor} ${_incident.room ?? ""}'),
+                    const SizedBox(height: 8),
+                    Text('Description: ${_incident.description}'),
+                  ],
+                ),
+              ),
+            ),
             const SizedBox(height: 24),
-            DropdownButtonFormField<String>(
-              decoration: const InputDecoration(labelText: 'Status', border: OutlineInputBorder()),
-              value: ['Reported', 'Assigned', 'In Progress', 'Resolved', 'Verified', 'Reopened'].contains(_selectedStatus) ? _selectedStatus : null,
-              items: ['Assigned', 'In Progress', 'Resolved'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
-              onChanged: (val) => setState(() => _selectedStatus = val!),
+            Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Color(0xFFE5E7EB)),
+              ),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                child: DropdownButtonHideUnderline(
+                  child: DropdownButton<String>(
+                    isExpanded: true,
+                    value: ['Reported', 'Assigned', 'In Progress', 'Resolved', 'Verified', 'Reopened'].contains(_selectedStatus) ? _selectedStatus : null,
+                    items: ['Assigned', 'In Progress', 'Resolved'].map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
+                    onChanged: (val) => setState(() => _selectedStatus = val!),
+                  ),
+                ),
+              ),
             ),
             const SizedBox(height: 16),
             TextField(
               controller: _actionController,
-              decoration: const InputDecoration(labelText: 'Action Taken', border: OutlineInputBorder()),
-              maxLines: 3,
+              decoration: const InputDecoration(
+                labelText: 'Action Taken',
+                alignLabelWithHint: true,
+              ),
+              maxLines: 4,
             ),
             const SizedBox(height: 32),
-            ElevatedButton(
-              onPressed: _isUpdating ? null : _update,
-              child: _isUpdating ? const CircularProgressIndicator() : const Text('Update Issue'),
+            SizedBox(
+              height: 56,
+              child: ElevatedButton(
+                onPressed: _isUpdating ? null : _update,
+                child: _isUpdating ? const CircularProgressIndicator(color: Colors.white) : const Text('Update Issue'),
+              ),
             ),
           ],
         ),

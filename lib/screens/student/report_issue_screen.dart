@@ -16,7 +16,6 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
   final _formKey = GlobalKey<FormState>();
   
   String? _selectedCategory;
-  String? _selectedSubcategory;
   String? _selectedBlock;
   String? _selectedFloor;
   
@@ -25,8 +24,55 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
   
   bool _isSubmitting = false;
 
+  void _showAddCategoryDialog() {
+    final textController = TextEditingController();
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Add Service Category'),
+          content: TextField(
+            controller: textController,
+            decoration: const InputDecoration(
+              hintText: 'e.g. Wi-Fi / Internet, Laundry, Plumbing',
+            ),
+            autofocus: true,
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('Cancel'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                final categoryName = textController.text.trim();
+                if (categoryName.isNotEmpty) {
+                  if (!AppConstants.categories.contains(categoryName)) {
+                    AppConstants.categories.add(categoryName);
+                  }
+                  setState(() {
+                    _selectedCategory = categoryName;
+                  });
+                }
+                Navigator.pop(dialogContext);
+              },
+              child: const Text('Add'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   void _submit() async {
     if (_formKey.currentState!.validate()) {
+      if (_selectedCategory == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please select a service category')),
+        );
+        return;
+      }
+
       setState(() => _isSubmitting = true);
       
       final user = context.read<AuthService>().currentUser!;
@@ -35,7 +81,7 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
       final incident = IncidentModel(
         id: 'HM${DateTime.now().millisecondsSinceEpoch.toString().substring(5)}',
         category: _selectedCategory!,
-        subcategory: _selectedSubcategory!,
+        subcategory: _selectedCategory!,
         description: _descriptionController.text,
         block: _selectedBlock ?? user.block ?? 'Unknown',
         floor: _selectedFloor ?? user.floor ?? 'Unknown',
@@ -66,47 +112,92 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              DropdownButtonFormField<String>(
-                decoration: const InputDecoration(labelText: 'Service Category', border: OutlineInputBorder()),
-                value: _selectedCategory,
-                items: AppConstants.categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                onChanged: (val) {
-                  setState(() {
-                    _selectedCategory = val;
-                    _selectedSubcategory = null;
-                  });
-                },
-                validator: (val) => val == null ? 'Please select a category' : null,
-              ),
-              const SizedBox(height: 16),
-              if (_selectedCategory != null)
-                DropdownButtonFormField<String>(
-                  decoration: const InputDecoration(labelText: 'Problem Type', border: OutlineInputBorder()),
-                  value: _selectedSubcategory,
-                  items: AppConstants.subcategories[_selectedCategory]!.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                  onChanged: (val) => setState(() => _selectedSubcategory = val),
-                  validator: (val) => val == null ? 'Please select a problem type' : null,
-                ),
-              const SizedBox(height: 16),
               Row(
                 children: [
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(labelText: 'Block', border: OutlineInputBorder()),
-                      value: _selectedBlock,
-                      items: AppConstants.blocks.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                      onChanged: (val) => setState(() => _selectedBlock = val),
-                      validator: (val) => val == null ? 'Required' : null,
+                    child: Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            hint: const Text('Service Category'),
+                            value: _selectedCategory,
+                            items: AppConstants.categories.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                            onChanged: (val) {
+                              setState(() {
+                                _selectedCategory = val;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton.icon(
+                  onPressed: _showAddCategoryDialog,
+                  icon: const Icon(Icons.add, size: 18),
+                  label: const Text('Add Service Category'),
+                ),
+              ),
+              if (_selectedCategory == null)
+                const Padding(
+                  padding: EdgeInsets.only(left: 16, bottom: 8),
+                  child: Text('Please select a category', style: TextStyle(color: Colors.red, fontSize: 12)),
+                ),
+              const SizedBox(height: 8),
+              Row(
+                children: [
+                  Expanded(
+                    child: Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            hint: const Text('Block'),
+                            value: _selectedBlock,
+                            items: AppConstants.blocks.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                            onChanged: (val) => setState(() => _selectedBlock = val),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: DropdownButtonFormField<String>(
-                      decoration: const InputDecoration(labelText: 'Floor', border: OutlineInputBorder()),
-                      value: _selectedFloor,
-                      items: AppConstants.floors.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
-                      onChanged: (val) => setState(() => _selectedFloor = val),
-                      validator: (val) => val == null ? 'Required' : null,
+                    child: Card(
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        side: const BorderSide(color: Color(0xFFE5E7EB)),
+                      ),
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        child: DropdownButtonHideUnderline(
+                          child: DropdownButton<String>(
+                            isExpanded: true,
+                            hint: const Text('Floor'),
+                            value: _selectedFloor,
+                            items: AppConstants.floors.map((c) => DropdownMenuItem(value: c, child: Text(c))).toList(),
+                            onChanged: (val) => setState(() => _selectedFloor = val),
+                          ),
+                        ),
+                      ),
                     ),
                   ),
                 ],
@@ -119,14 +210,20 @@ class _ReportIssueScreenState extends State<ReportIssueScreen> {
               const SizedBox(height: 16),
               TextFormField(
                 controller: _descriptionController,
-                decoration: const InputDecoration(labelText: 'Description', border: OutlineInputBorder()),
-                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Description',
+                  alignLabelWithHint: true,
+                ),
+                maxLines: 4,
                 validator: (val) => val == null || val.isEmpty ? 'Please enter a description' : null,
               ),
               const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _isSubmitting ? null : _submit,
-                child: _isSubmitting ? const CircularProgressIndicator() : const Text('Submit Report'),
+              SizedBox(
+                height: 56,
+                child: ElevatedButton(
+                  onPressed: _isSubmitting ? null : _submit,
+                  child: _isSubmitting ? const CircularProgressIndicator(color: Colors.white) : const Text('Submit Report'),
+                ),
               ),
             ],
           ),

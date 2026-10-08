@@ -45,12 +45,22 @@ class _IssueTrackingScreenState extends State<IssueTrackingScreen> {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             Card(
+              elevation: 0,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+                side: const BorderSide(color: Color(0xFFE5E7EB)),
+              ),
               child: Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('${_incident.category} - ${_incident.subcategory}', style: Theme.of(context).textTheme.titleLarge),
+                    Text(
+                      _incident.subcategory.isNotEmpty && _incident.subcategory != _incident.category 
+                          ? '${_incident.category} - ${_incident.subcategory}' 
+                          : _incident.category, 
+                      style: Theme.of(context).textTheme.titleLarge,
+                    ),
                     const SizedBox(height: 8),
                     Text('Location: ${_incident.block}, ${_incident.floor} ${_incident.room ?? ""}'),
                     const SizedBox(height: 8),
@@ -84,20 +94,26 @@ class _IssueTrackingScreenState extends State<IssueTrackingScreen> {
               Row(
                 children: [
                   Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-                      onPressed: () => _verifyResolution(true),
-                      icon: const Icon(Icons.check),
-                      label: const Text('Yes'),
+                    child: SizedBox(
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF10B981)),
+                        onPressed: () => _verifyResolution(true),
+                        icon: const Icon(Icons.check),
+                        label: const Text('Yes'),
+                      ),
                     ),
                   ),
                   const SizedBox(width: 16),
                   Expanded(
-                    child: ElevatedButton.icon(
-                      style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
-                      onPressed: () => _verifyResolution(false),
-                      icon: const Icon(Icons.close),
-                      label: const Text('No'),
+                    child: SizedBox(
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFFEF4444)),
+                        onPressed: () => _verifyResolution(false),
+                        icon: const Icon(Icons.close),
+                        label: const Text('No'),
+                      ),
                     ),
                   ),
                 ],

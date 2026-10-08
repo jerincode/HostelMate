@@ -51,11 +51,14 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
                       const SizedBox(height: 16),
                       _buildMealCard('Dinner', _menu!.dinner),
                       const Spacer(),
-                      ElevatedButton(
-                        onPressed: () {
-                           Navigator.push(context, MaterialPageRoute(builder: (context) => const FoodFeedbackScreen()));
-                        },
-                        child: const Text('Submit Food Feedback'),
+                      SizedBox(
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: () {
+                             Navigator.push(context, MaterialPageRoute(builder: (context) => const FoodFeedbackScreen()));
+                          },
+                          child: const Text('Submit Food Feedback'),
+                        ),
                       ),
                       const SizedBox(height: 16),
                     ],
@@ -66,6 +69,11 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
 
   Widget _buildMealCard(String mealName, String menu) {
     return Card(
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(12),
+        side: const BorderSide(color: Color(0xFFE5E7EB)),
+      ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -73,7 +81,7 @@ class _MessMenuScreenState extends State<MessMenuScreen> {
           children: [
             Text(mealName, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold, color: Theme.of(context).primaryColor)),
             const SizedBox(height: 8),
-            Text(menu, style: const TextStyle(fontSize: 16)),
+            Text(menu, style: const TextStyle(fontSize: 16, color: Color(0xFF374151))),
           ],
         ),
       ),
